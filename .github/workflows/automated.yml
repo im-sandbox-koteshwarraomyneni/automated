@@ -21,7 +21,7 @@ jobs:
         curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
              -H "Accept: application/vnd.github.inertia-preview+json" \
              -d '{"name":"'"${PROJECT_NAME}"'", "body": "A new project"}' \
-             https://api.github.com/orgs/${ORG_NAME}/projects
+              https://api.github.com/orgs/myorg/projects
   create-repo:
     needs: create-project
     runs-on: ubuntu-latest
