@@ -1,36 +1,43 @@
-# This is a basic workflow to help you get started with Actions
-
-name: CI
-
-# Controls when the workflow will run
+name: Create Project, Repository, and Workflow
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+env:
+  ORG_NAME: im-sandbox-koteshwarraomyneni
+  PROJECT_NAME: My Project workflow
+  REPO_NAME: newrepofromworlflow
+  BRANCH_NAME: main
+  WORKFLOW_NAME: My Workflow
+  WORKFLOW_FILE: my-workflow.yml
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  create-project:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+    - name: Create Project
+      run: |
+        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+             -H "Accept: application/vnd.github.inertia-preview+json" \
+             -d '{"name":"'"${PROJECT_NAME}"'", "body": "A new project"}' \
+             https://api.github.com/orgs/${ORG_NAME}/projects
+  create-repo:
+    needs: create-project
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Repository
+      run: |
+        hub create -d "A new repository" -p ${PROJECT_NAME} ${REPO_NAME}
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+  add-workflow:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Add Workflow
+      run: |
+        curl -X PUT \
+             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+             -H "Accept: application/vnd.github.inertia-preview+json" \
+             -d '{"name":"'"${WORKFLOW_NAME}"'", "path":"'"${WORKFLOW_FILE}"'", "branch":"'"${BRANCH_NAME}"'"}' \
+             https://api.github.com/repos/${REPO_NAME}/contents/${WORKFLOW_FILE}
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
