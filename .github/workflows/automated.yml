@@ -8,6 +8,8 @@ jobs:
   create-project-and-repo:
     runs-on: ubuntu-latest
     steps:
+      - name: Install dependencies
+        run: npm install @octokit/core
       - name: Create Project
         uses: actions/github-script@v3
         with:
