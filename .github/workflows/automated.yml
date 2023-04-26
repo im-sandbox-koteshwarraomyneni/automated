@@ -12,7 +12,10 @@ jobs:
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          
           script: |
+            const { Octokit } = require("@octokit/core");
+            const octokit = new Octokit({ auth: `token ${process.env.GITHUB_TOKEN}` });
             const response = await octokit.projects.createForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
