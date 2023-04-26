@@ -1,40 +1,79 @@
 name: Create Project and Repository
-
 on:
   push:
-    branches: [ main ]
-
+    branches:
+      - main
 jobs:
   create-project-and-repo:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x]
     steps:
-      - uses: actions/setup-node@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 16.x
       - name: Install dependencies
-        run: npm install
-      - name: Run tests
-        run: npm test
-      - name: Install dependencies
-        run: npm install @octokit/core
-      - name: Create Project
-        uses: actions/github-script@v3
+        run: npm install @actions/github
+      - name: Create project
+        id: create-project
+        uses: actions/github-script@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const { Octokit } = require("@octokit/core");
-            const octokit = new Octokit({ auth: `token ${process.env.GITHUB_TOKEN}` });
-            const orgName = "your-organization-name";
-            const projectName = "your-project-name";
-            const repoName = "your-repo-name";
-            const project = await octokit.projects.createForOrg({ org: orgName, name: projectName });
-            const projectId = project.data.id;
-            const repo = await octokit.repos.createForAuthenticatedUser({ name: repoName });
-            await octokit.projects.createForRepo({ owner: orgName, repo: repoName, name: projectName });
-            await octokit.projects.createColumn({ project_id: projectId, name: "To do" });
-            await octokit.projects.createColumn({ project_id: projectId, name: "In progress" });
-            await octokit.projects.createColumn({ project_id: projectId, name: "Done" });
-            await octokit.projects.createCard({ column_id: projectId, content_id: repo.data.id, content_type: "PullRequest" });
+            const { GitHub, context } = require('@actions/github');
+            const octokit = new GitHub(process.env.GITHUB_TOKEN);
+            const { owner } = context.repo;
+            const project = await octokit.projects.createForOrg({
+              org: owner,
+              name: 'My Project',
+              body: 'This is my project description'
+            });
+            console.log(`Created project with ID ${project.data.id}`);
+            console.log(`Project URL: ${project.data.html_url}`);
+            console.log(`Project web URL: ${project.data.web_url}`);
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create repository
+        id: create-repo
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { GitHub, context } = require('@actions/github');
+            const octokit = new GitHub(process.env.GITHUB_TOKEN);
+            const { owner, repo } = context.repo;
+            const repoName = 'my-repo';
+            const repoDescription = 'My repository description';
+            const repository = await octokit.repos.createForOrg({
+              org: owner,
+              name: repoName,
+              description: repoDescription,
+              private: false
+            });
+            console.log(`Created repository ${repoName}`);
+            console.log(`Repository URL: ${repository.data.html_url}`);
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Associate repository with project
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { GitHub, context } = require('@actions/github');
+            const octokit = new GitHub(process.env.GITHUB_TOKEN);
+            const { owner, repo } = context.repo;
+            const projectName = 'My Project';
+            const projectColumns = await octokit.projects.listColumns({
+              project_id: ${{ steps.create-project.outputs.create-project.data.id }}
+            });
+            const projectColumnId = projectColumns.data[0].id;
+            const projectCards = await octokit.projects.listCards({
+              column_id: projectColumnId
+            });
+            const projectCardId = projectCards.data[0].id;
+            await octokit.projects.createCard({
+              column_id: projectColumnId,
+              content_id: ${{ steps.create-repo.outputs.create-repo.data.id }},
+              content_type: 'Repo'
+            });
+            console.log(`Associated repository ${repo} with project ${projectName}`);
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
