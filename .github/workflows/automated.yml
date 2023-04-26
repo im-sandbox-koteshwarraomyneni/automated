@@ -1,8 +1,8 @@
 name: Create Project and Repository
 
 on:
-  repository:
-    types: [created]
+  push:
+    branches: [ main ]
 
 jobs:
   create-project-and-repo:
