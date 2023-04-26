@@ -1,10 +1,10 @@
-name: Create Project and Repository
+name: Create Repository
 on:
   push:
     branches:
       - main
 jobs:
-  create-project-and-repo:
+  create-repo:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -15,65 +15,13 @@ jobs:
           node-version: 16.x
       - name: Install dependencies
         run: npm install @actions/github
-      - name: Create project
-        id: create-project
+      - name: Create repository
         uses: actions/github-script@v5
         with:
           script: |
             const { GitHub, context } = require('@actions/github');
             const octokit = new GitHub(process.env.GITHUB_TOKEN);
             const { owner } = context.repo;
-            const project = await octokit.projects.createForOrg({
-              org: owner,
-              name: 'My Project',
-              body: 'This is my project description'
-            });
-            console.log(`Created project with ID ${project.data.id}`);
-            console.log(`Project URL: ${project.data.html_url}`);
-            console.log(`Project web URL: ${project.data.web_url}`);
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create repository
-        id: create-repo
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const { GitHub, context } = require('@actions/github');
-            const octokit = new GitHub(process.env.GITHUB_TOKEN);
-            const { owner, repo } = context.repo;
             const repoName = 'my-repo';
             const repoDescription = 'My repository description';
-            const repository = await octokit.repos.createForOrg({
-              org: owner,
-              name: repoName,
-              description: repoDescription,
-              private: false
-            });
-            console.log(`Created repository ${repoName}`);
-            console.log(`Repository URL: ${repository.data.html_url}`);
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Associate repository with project
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const { GitHub, context } = require('@actions/github');
-            const octokit = new GitHub(process.env.GITHUB_TOKEN);
-            const { owner, repo } = context.repo;
-            const projectName = 'My Project';
-            const projectColumns = await octokit.projects.listColumns({
-              project_id: ${{ steps.create-project.outputs.create-project.data.id }}
-            });
-            const projectColumnId = projectColumns.data[0].id;
-            const projectCards = await octokit.projects.listCards({
-              column_id: projectColumnId
-            });
-            const projectCardId = projectCards.data[0].id;
-            await octokit.projects.createCard({
-              column_id: projectColumnId,
-              content_id: ${{ steps.create-repo.outputs.create-repo.data.id }},
-              content_type: 'Repo'
-            });
-            console.log(`Associated repository ${repo} with project ${projectName}`);
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            const repository = await octokit.repos.createForAuthenticatedUser({
