@@ -1,36 +1,28 @@
-name: Create Project
+name: Create Project and Repository
 
 on:
-  push:
-    branches: [ main ]
+  repository:
+    types: [created]
 
 jobs:
-  create-project:
+  create-project-and-repo:
     runs-on: ubuntu-latest
     steps:
       - name: Create Project
         uses: actions/github-script@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          
           script: |
             const { Octokit } = require("@octokit/core");
             const octokit = new Octokit({ auth: `token ${process.env.GITHUB_TOKEN}` });
-            const response = await octokit.projects.createForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: "New Project",
-            });
-            const projectId = response.data.id;
-            await octokit.projects.createColumn({
-              project_id: projectId,
-              name: "To do",
-            });
-            await octokit.projects.createColumn({
-              project_id: projectId,
-              name: "In progress",
-            });
-            await octokit.projects.createColumn({
-              project_id: projectId,
-              name: "Done",
-            });
+            const orgName = "your-organization-name";
+            const projectName = "your-project-name";
+            const repoName = "your-repo-name";
+            const project = await octokit.projects.createForOrg({ org: orgName, name: projectName });
+            const projectId = project.data.id;
+            const repo = await octokit.repos.createForAuthenticatedUser({ name: repoName });
+            await octokit.projects.createForRepo({ owner: orgName, repo: repoName, name: projectName });
+            await octokit.projects.createColumn({ project_id: projectId, name: "To do" });
+            await octokit.projects.createColumn({ project_id: projectId, name: "In progress" });
+            await octokit.projects.createColumn({ project_id: projectId, name: "Done" });
+            await octokit.projects.createCard({ column_id: projectId, content_id: repo.data.id, content_type: "PullRequest" });
