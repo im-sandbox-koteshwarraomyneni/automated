@@ -12,10 +12,10 @@ jobs:
              -H "Accept: application/vnd.github.inertia-preview+json" \
              -d '{"name":"My Project", "body": "A new project"}' \
              https://api.github.com/orgs/im-sandbox-koteshwarraomyneni/projects
-  create-repo:
-    needs: create-project
-    runs-on: ubuntu-latest
-    steps:
-    - name: Create Repository
-      run: |
-        hub create -d "A new repository" -p "My Project" myrepo
+  # create-repo:
+  #   needs: create-project
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Create Repository
+  #     run: |
+  #       hub create -d "A new repository" -p "My Project" myrepo
