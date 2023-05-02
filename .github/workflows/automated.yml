@@ -6,7 +6,7 @@ on:
  
 env:
   ORG_NAME: im-sandbox-koteshwarraomyneni
-  PROJECT_NAME: My Project workflow
+  PROJECT_NAME: project1
   REPO_NAME: newrepofromworlflow
   BRANCH_NAME: main
   WORKFLOW_NAME: My Workflow
@@ -14,17 +14,8 @@ env:
 
 
 jobs:
-  create-project:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Create Project
-      run: |
-        curl -H "Authorization: token ${{ secrets.API_ACCESS1 }}" \
-             -H "Accept: application/vnd.github.inertia-preview+json" \
-             -d '{"name":"'"${PROJECT_NAME}"'", "body": "A new project"}' \
-             https://api.github.com/orgs/${ORG_NAME}/projects
+  
   create-repo:
-    needs: create-project
     runs-on: ubuntu-latest
     steps:
     - name: Create Repository
