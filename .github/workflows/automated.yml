@@ -1,3 +1,4 @@
+name: Create Project, Repository, and Workflow
 on:
   push:
     branches: [ main ]
