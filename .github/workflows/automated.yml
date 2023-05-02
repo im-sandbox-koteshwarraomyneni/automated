@@ -17,6 +17,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+    - name: Use Node.js 16
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
     - name: Create Repository
       run: |
         hub create -d "A new repository" -p ${PROJECT_NAME} ${REPO_NAME}
@@ -26,6 +32,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+      with:
+        ref: ${{ github.ref }}
+    - name: Use Node.js 16
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
     - name: Add Workflow
       run: |
         curl -X PUT \
