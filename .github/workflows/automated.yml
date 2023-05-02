@@ -1,9 +1,7 @@
-name: Create Project, Repository, and Workflow
 on:
   push:
     branches: [ main ]
 
- 
 env:
   ORG_NAME: im-sandbox-koteshwarraomyneni
   PROJECT_NAME: project1
@@ -12,12 +10,12 @@ env:
   WORKFLOW_NAME: My Workflow
   WORKFLOW_FILE: my-workflow.yml
 
-
 jobs:
-  
   create-repo:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
     - name: Create Repository
       run: |
         hub create -d "A new repository" -p ${PROJECT_NAME} ${REPO_NAME}
@@ -25,6 +23,8 @@ jobs:
     needs: create-repo
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
     - name: Add Workflow
       run: |
         curl -X PUT \
