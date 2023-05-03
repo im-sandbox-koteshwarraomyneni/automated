@@ -16,6 +16,8 @@ jobs:
 
     steps:
       - name: Create New Repo
+        env:
+          GH_TOKEN: ${{ secrets.APIACCESS1 }}
         run: |
           gh repo create im-sandbox-koteshwarraomyneni/${{ github.event.inputs.repo_name }} --private
           echo "::set-output name=repo_name::${{ github.event.inputs.repo_name }}"
