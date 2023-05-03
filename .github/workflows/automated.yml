@@ -40,7 +40,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.APIACCESS1 }}
         with:
           script: |
-            const github = context.github;
             const orgName = 'im-sandbox-koteshwarraomyneni';
             const repoName = '${{ github.event.inputs.repo_name }}';
             const labelName = 'incubator';
