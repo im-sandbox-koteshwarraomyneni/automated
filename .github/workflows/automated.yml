@@ -1,47 +1,30 @@
-name: Create Project, Repository, and Workflow
-on:
-  push:
-    branches: [ main ]
+name: Create New Repo
 
-env:
-  ORG_NAME: im-sandbox-koteshwarraomyneni
-  PROJECT_NAME: project1
-  REPO_NAME: newrepofromworlflow
-  BRANCH_NAME: main
-  WORKFLOW_NAME: My Workflow
-  WORKFLOW_FILE: my-workflow.yml
+on:
+  workflow_dispatch:
+    inputs:
+      repo_name:
+        description: 'Enter the name of the new repository'
+        required: true
 
 jobs:
-  create-repo:
+  create_repo:
     runs-on: ubuntu-latest
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        ref: ${{ github.ref }}
-    - name: Use Node.js 16
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-    - name: Create Repository
-      run: |
-        hub create -d "A new repository" -p ${PROJECT_NAME} ${REPO_NAME}
-  add-workflow:
-    needs: create-repo
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-      with:
-        ref: ${{ github.ref }}
-    - name: Use Node.js 16
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-    - name: Add Workflow
-      run: |
-        curl -X PUT \
-             -H "Authorization: token ${{ secrets.API_ACCESS1 }}" \
-             -H "Accept: application/vnd.github.inertia-preview+json" \
-             -d '{"name":"'"${WORKFLOW_NAME}"'", "path":"'"${WORKFLOW_FILE}"'", "branch":"'"${BRANCH_NAME}"'"}' \
-             https://api.github.com/repos/${REPO_NAME}/contents/${WORKFLOW_FILE}
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Create New Repo
+        uses: actions/github-script@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          script: |
+            const github = context.github;
+            const orgName = 'im-sandbox-koteshwarraomyneni';
+            const repoName = '${{ github.event.inputs.repo_name }}';
+            const repoData = {name: repoName, auto_init: true};
+            const newRepo = await github.repos.createInOrg({org: orgName, ...repoData});
+            console.log(`Created new repo: ${newRepo.data.html_url}`);
+
