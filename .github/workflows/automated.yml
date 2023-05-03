@@ -1,14 +1,4 @@
-name: Create Project, Repository, and Workflow
- 
-
-env:
-  ORG_NAME: im-sandbox-koteshwarraomyneni
-  PROJECT_NAME: project1
-  REPO_NAME: newrepofromworlflow
-  BRANCH_NAME: main
-  WORKFLOW_NAME: My Workflow
-  WORKFLOW_FILE: my-workflow.yml
- 
+name: Create New Repo
 
 on:
   workflow_dispatch:
