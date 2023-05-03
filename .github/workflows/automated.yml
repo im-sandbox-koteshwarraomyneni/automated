@@ -6,7 +6,9 @@ on:
       repo_name:
         description: 'Enter the name of the new repository'
         required: true
-
+      app_name:
+        description: 'Enter the name of the new Angular application'
+        required: true
 jobs:
   create_repo:
     runs-on: ubuntu-latest
@@ -22,4 +24,28 @@ jobs:
             https://api.github.com/orgs/im-sandbox-koteshwarraomyneni/repos \
             -d '{"name": "'"${{ github.event.inputs.repo_name }}"'"}'
 
+      - name: Create Angular App
+        run: |
+          ng new ${{ github.event.inputs.app_name }}
+
+      - name: Commit and Push Changes
+        run: |
+          git add .
+          git commit -m "Initial commit"
+          git push origin main
+
+      - name: Label Incubator Code
+        uses: actions/github-script@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.APIACCESS1 }}
+        with:
+          script: |
+            const github = context.github;
+            const orgName = 'im-sandbox-koteshwarraomyneni';
+            const repoName = '${{ github.event.inputs.repo_name }}';
+            const labelName = 'incubator';
+            const labelColor = 'F2D04B';
+            const labelData = {name: labelName, color: labelColor};
+            const newLabel = await github.issues.createLabel({owner: orgName, repo: repoName, ...labelData});
+            console.log(`Created new label: ${newLabel.data.name}`);
 
