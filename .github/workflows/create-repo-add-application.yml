@@ -25,7 +25,7 @@ jobs:
         with:
           script: |
             const github = context.github;
-            const orgName = 'your-organization-name';
+            const orgName = 'im-sandbox-koteshwarraomyneni';
             const repoName = '${{ github.event.inputs.repo_name }}';
             const repoData = {name: repoName};
             const newRepo = await github.repos.createInOrg({org: orgName, ...repoData});
@@ -48,7 +48,7 @@ jobs:
         with:
           script: |
             const github = context.github;
-            const orgName = 'your-organization-name';
+            const orgName = 'im-sandbox-koteshwarraomyneni';
             const repoName = '${{ github.event.inputs.repo_name }}';
             const labelName = 'incubator';
             const labelColor = 'F2D04B';
