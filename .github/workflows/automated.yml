@@ -22,4 +22,15 @@ jobs:
             https://api.github.com/orgs/im-sandbox-koteshwarraomyneni/repos \
             -d '{"name": "'"${{ github.event.inputs.repo_name }}"'"}'
 
+  create_project:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.APIACCESS1 }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
+      - name: Create Project
+        run: |
+          gh auth login --with-token <<< "${GITHUB_TOKEN}"
+          gh project create --name "new-project" --body "New project created from workflow" --private
